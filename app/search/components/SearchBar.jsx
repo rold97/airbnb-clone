@@ -1,21 +1,24 @@
 import { useState } from "react";
-import Counter from "./Counter";
+import { Counter } from "../components/Counter";
 import "react-date-range/dist/styles.css"; // main style file
 import "react-date-range/dist/theme/default.css"; // theme css file
 import { DateRangePicker } from "react-date-range";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
+import { useSearchStore } from "@/store";
+import { useRouter } from "next/navigation";
 
-const SearchBar = () => {
+const SearchBar = ({ toggleExpanded }) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(null);
+  const locationInput = useSearchStore((state) => state.location);
+  const startDate = useSearchStore((state) => state.dates[0]);
+  const endDate = useSearchStore((state) => state.dates[1]);
+  const router = useRouter();
 
   const handleSelect = (ranges) => {
-    if (ranges.selection.startDate !== startDate) {
-      setStartDate(ranges.selection.startDate);
-    }
-    if (ranges.selection.endDate !== endDate) {
-      setEndDate(ranges.selection.endDate);
-    }
+    useSearchStore.setState({
+      dates: [ranges.selection.startDate, ranges.selection.endDate],
+    });
   };
 
   const selectionRange = {
@@ -24,18 +27,32 @@ const SearchBar = () => {
     key: "selection",
   };
 
+  const handleLocationUpdate = (e) => {
+    useSearchStore.setState({ location: e.target.value });
+  };
+
+  const handleSearchClick = () => {
+    router.push("/search/results");
+    toggleExpanded();
+  };
+
   return (
-    <div className="flex flex-row self-center rounded-full border p-2 mt-8 w-3/4">
-      <button onClick={() => setIsSearchFocused(true)}>
-        <p className="font-bold ">Where</p>
+    <div className="flex flex-row self-center justify-center items-center rounded-full border py-2 mt-8 w-3/4">
+      <button
+        className="border-r px-4 text-left"
+        onClick={() => setIsSearchFocused(true)}
+      >
+        <p className="font-bold">Where</p>
         {isSearchFocused ? (
           <input
             type="text"
-            placeholder="Search destination"
+            placeholder="Search destinations"
+            onChange={handleLocationUpdate}
+            value={locationInput}
             className="text-slate-800 bg-transparent border-none outline-none"
           />
         ) : (
-          <p className="text-slate-600">Search destination</p>
+          <p className="text-slate-600">Search destinations</p>
         )}
       </button>
       <div className="dropdown dropdown-end px-4 border-r">
@@ -55,7 +72,7 @@ const SearchBar = () => {
           />
         </div>
       </div>
-      <div className="dropdown dropdown-end px-4 border-r">
+      <div className="dropdown dropdown-end px-4">
         <label tabIndex={2}>
           <p className="font-bold">Who</p>
           <p className="text-slate-600">Add Guests</p>
@@ -67,6 +84,14 @@ const SearchBar = () => {
           <Counter label="Adults" />
         </div>
       </div>
+      <button
+        onClick={handleSearchClick}
+        href="/search/results"
+        className="mr-2 px-4 py-2 text-white rounded-full bg-primary flex justify-center gap-3 flex-row items-center h-[55px]"
+      >
+        <MagnifyingGlassIcon className="w-5 h-5" />
+        <span>Search</span>
+      </button>
     </div>
   );
 };

@@ -1,13 +1,13 @@
-import React from "react";
 import Header from "./Header";
-
-const searchLayout = ({ children }) => {
+const SearchLayout = ({ children }) => {
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <main className="relative top-[7.5rem] pt-4 container mx-auto">
+        {children}
+      </main>
     </>
   );
 };
 
-export default searchLayout;
+export default SearchLayout;
